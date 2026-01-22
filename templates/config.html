@@ -1,0 +1,119 @@
+<form class="cultural-origins-config">
+  <nav class="sheet-tabs tabs" data-group="primary-tabs">
+    <a class="item" data-tab="origins">Cultural Origins</a>
+    <a class="item" data-tab="import-export">Import/Export</a>
+  </nav>
+
+  <section class="content">
+    <div class="tab" data-group="primary-tabs" data-tab="origins">
+      <h2>Built-in Cultural Origins</h2>
+      <ul class="origin-list">
+        {{#each builtInOrigins}}
+        <li>
+          <span class="origin-name">{{this}}</span>
+          <span class="origin-note">(Built-in - Cannot Edit)</span>
+        </li>
+        {{/each}}
+      </ul>
+
+      <h2>Custom Cultural Origins</h2>
+      <button type="button" class="add-origin" style="margin-bottom: 10px;">
+        <i class="fas fa-plus"></i> Add New Cultural Origin
+      </button>
+
+      {{#if customOrigins}}
+      <ul class="origin-list">
+        {{#each customOrigins}}
+        <li>
+          <span class="origin-name">{{this.name}}</span>
+          <div class="origin-controls">
+            <button type="button" class="edit-origin" data-origin="{{this.name}}">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button type="button" class="delete-origin" data-origin="{{this.name}}">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </li>
+        {{/each}}
+      </ul>
+      {{else}}
+      <p style="font-style: italic; color: #888;">No custom cultural origins yet. Click "Add New" to create one.</p>
+      {{/if}}
+    </div>
+
+    <div class="tab" data-group="primary-tabs" data-tab="import-export">
+      <h2>Import/Export Cultural Origins</h2>
+      <p>Export your custom cultural origins to share with others, or import origins from a JSON file.</p>
+
+      <div style="margin-top: 20px;">
+        <button type="button" class="export-origins">
+          <i class="fas fa-download"></i> Export Custom Origins
+        </button>
+
+        <button type="button" class="import-origins" style="margin-left: 10px;">
+          <i class="fas fa-upload"></i> Import Origins
+        </button>
+      </div>
+
+      <p style="margin-top: 20px; font-size: 0.9em; color: #666;">
+        <strong>Note:</strong> Importing will merge with existing custom origins. Origins with the same name will be overwritten.
+      </p>
+    </div>
+  </section>
+</form>
+
+<style>
+.cultural-origins-config .origin-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.cultural-origins-config .origin-list li {
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  margin-bottom: 5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cultural-origins-config .origin-name {
+  font-weight: bold;
+  flex-grow: 1;
+}
+
+.cultural-origins-config .origin-note {
+  font-style: italic;
+  color: #888;
+  font-size: 0.9em;
+}
+
+.cultural-origins-config .origin-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.cultural-origins-config button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background: #4b4a44;
+  color: white;
+}
+
+.cultural-origins-config button:hover {
+  background: #5e5d56;
+}
+
+.cultural-origins-config .delete-origin {
+  background: #a41e1e;
+}
+
+.cultural-origins-config .delete-origin:hover {
+  background: #c92a2a;
+}
+</style>

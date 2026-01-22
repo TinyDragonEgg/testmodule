@@ -1,0 +1,149 @@
+<form class="cultural-origin-editor" autocomplete="off">
+  <div class="form-group">
+    <label>Origin Name</label>
+    <input type="text" name="name" value="{{origin.name}}" placeholder="e.g., Tharon Heritage" required />
+  </div>
+
+  <div class="form-group">
+    <label>Skill Proficiency</label>
+    <select name="skill">
+      {{#each skills}}
+      <option value="{{@key}}" {{#if (eq @key ../origin.skill)}}selected{{/if}}>{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <hr />
+
+  <h3>Main Feature</h3>
+  <div class="form-group">
+    <label>Feature Name</label>
+    <input type="text" name="mainFeature.name" value="{{origin.mainFeature.name}}" placeholder="e.g., Tharon Heritage" required />
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <textarea name="mainFeature.description" rows="4" placeholder="Main heritage description including language and equipment notes">{{origin.mainFeature.description}}</textarea>
+  </div>
+
+  <hr />
+
+  <h3>Special Feature</h3>
+  <div class="form-group">
+    <label>Feature Name</label>
+    <input type="text" name="specialFeature.name" value="{{origin.specialFeature.name}}" placeholder="e.g., Military Connections" required />
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <textarea name="specialFeature.description" rows="4" placeholder="Special feature description">{{origin.specialFeature.description}}</textarea>
+  </div>
+
+  <hr />
+
+  <h3>Cultural Trait</h3>
+  <div class="form-group">
+    <label>Trait Name</label>
+    <input type="text" name="culturalTrait.name" value="{{origin.culturalTrait.name}}" placeholder="e.g., Honor Bound" required />
+  </div>
+
+  <div class="form-group">
+    <label>Description</label>
+    <textarea name="culturalTrait.description" rows="4" placeholder="Cultural trait description">{{origin.culturalTrait.description}}</textarea>
+  </div>
+
+  <hr />
+
+  <h3>Equipment</h3>
+  <button type="button" class="add-equipment" style="margin-bottom: 10px;">
+    <i class="fas fa-plus"></i> Add Equipment Item
+  </button>
+
+  <div class="equipment-list">
+    {{#each origin.equipment}}
+    <div class="equipment-item" style="display: flex; gap: 10px; margin-bottom: 8px; align-items: center;">
+      <input type="text" name="equipment.name" value="{{this.name}}" placeholder="Item name" style="flex: 2;" />
+      <select name="equipment.type" style="flex: 1;">
+        <option value="equipment" {{#if (eq this.type "equipment")}}selected{{/if}}>Equipment</option>
+        <option value="weapon" {{#if (eq this.type "weapon")}}selected{{/if}}>Weapon</option>
+        <option value="loot" {{#if (eq this.type "loot")}}selected{{/if}}>Loot</option>
+        <option value="consumable" {{#if (eq this.type "consumable")}}selected{{/if}}>Consumable</option>
+        <option value="tool" {{#if (eq this.type "tool")}}selected{{/if}}>Tool</option>
+      </select>
+      <button type="button" class="remove-equipment" data-index="{{@index}}">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    {{/each}}
+  </div>
+
+  <hr style="margin-top: 20px;" />
+
+  <div class="form-group" style="text-align: right; margin-top: 15px;">
+    <button type="submit">
+      <i class="fas fa-save"></i> {{#if isNew}}Create{{else}}Update{{/if}} Origin
+    </button>
+  </div>
+</form>
+
+<style>
+.cultural-origin-editor .form-group {
+  margin-bottom: 15px;
+}
+
+.cultural-origin-editor label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.cultural-origin-editor input[type="text"],
+.cultural-origin-editor select,
+.cultural-origin-editor textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #7a7971;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.cultural-origin-editor textarea {
+  font-family: inherit;
+  resize: vertical;
+}
+
+.cultural-origin-editor button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background: #4b4a44;
+  color: white;
+}
+
+.cultural-origin-editor button:hover {
+  background: #5e5d56;
+}
+
+.cultural-origin-editor .remove-equipment {
+  background: #a41e1e;
+  padding: 6px 10px;
+}
+
+.cultural-origin-editor .remove-equipment:hover {
+  background: #c92a2a;
+}
+
+.cultural-origin-editor hr {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+}
+
+.cultural-origin-editor h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 5px;
+}
+</style>

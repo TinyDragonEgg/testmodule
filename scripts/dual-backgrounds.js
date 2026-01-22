@@ -152,6 +152,26 @@ class DualBackgroundsManager {
   static initialize() {
     this.log('Initializing Dual Backgrounds system');
 
+    // Register game settings
+    game.settings.register(this.ID, 'customCulturalOrigins', {
+      name: 'Custom Cultural Origins',
+      hint: 'Custom cultural origins added by the GM',
+      scope: 'world',
+      config: false,
+      type: Object,
+      default: {}
+    });
+
+    // Register settings menu
+    game.settings.registerMenu(this.ID, 'culturalOriginsConfig', {
+      name: 'Configure Cultural Origins',
+      label: 'Manage Cultural Origins',
+      hint: 'Add, edit, or remove cultural origins',
+      icon: 'fas fa-cogs',
+      type: CulturalOriginsConfig,
+      restricted: true
+    });
+
     // D&D 5e v5.2.4+ (Foundry v13) uses CharacterActorSheet
     Hooks.on('renderCharacterActorSheet', this.onRenderActorSheet.bind(this));
 
@@ -165,6 +185,14 @@ class DualBackgroundsManager {
 
     this.log('Dual Backgrounds system initialized');
     this.log('Hooks registered: renderCharacterActorSheet, renderActorSheet5eCharacter, renderActorSheet');
+  }
+
+  /**
+   * Get all cultural origins (built-in + custom)
+   */
+  static getAllCulturalOrigins() {
+    const customOrigins = game.settings.get(this.ID, 'customCulturalOrigins') || {};
+    return { ...this.CULTURAL_ORIGINS, ...customOrigins };
   }
 
   /**
@@ -192,13 +220,16 @@ class DualBackgroundsManager {
     // Get current cultural origin
     const culturalOrigin = actor.getFlag(this.ID, this.FLAGS.CULTURAL_ORIGIN) || '';
 
+    // Get all cultural origins (built-in + custom)
+    const allOrigins = this.getAllCulturalOrigins();
+
     // Create cultural origin selector HTML
     const culturalOriginHTML = `
       <div class="form-group cultural-origin-group" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px;">
         <label style="font-weight: bold; display: block; margin-bottom: 5px;">Cultural Origin</label>
         <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String" style="width: 100%;">
           <option value="">None</option>
-          ${Object.keys(this.CULTURAL_ORIGINS).map(origin => `
+          ${Object.keys(allOrigins).map(origin => `
             <option value="${origin}" ${culturalOrigin === origin ? 'selected' : ''}>${origin}</option>
           `).join('')}
         </select>
@@ -297,7 +328,8 @@ class DualBackgroundsManager {
       }
 
       // Remove skill proficiency from old origin
-      const oldSkill = this.CULTURAL_ORIGINS[oldOrigin]?.skill;
+      const allOrigins = this.getAllCulturalOrigins();
+      const oldSkill = allOrigins[oldOrigin]?.skill;
       if (oldSkill) {
         const skillPath = `system.skills.${oldSkill}.proficient`;
         await actor.update({ [skillPath]: 0 });
@@ -305,8 +337,9 @@ class DualBackgroundsManager {
     }
 
     // Add new cultural origin
-    if (newOrigin && newOrigin !== '' && this.CULTURAL_ORIGINS[newOrigin]) {
-      const originData = this.CULTURAL_ORIGINS[newOrigin];
+    const allOrigins = this.getAllCulturalOrigins();
+    if (newOrigin && newOrigin !== '' && allOrigins[newOrigin]) {
+      const originData = allOrigins[newOrigin];
       const itemsToCreate = [];
 
       // Feature 1: Main cultural heritage feature
@@ -545,6 +578,253 @@ class DualBackgroundsManager {
       'tool': 'icons/tools/hand/hammer-simple-metal-brown.webp'
     };
     return icons[type] || 'icons/sundries/misc/box-wooden.webp';
+  }
+}
+
+/**
+ * Configuration form for managing cultural origins
+ */
+class CulturalOriginsConfig extends FormApplication {
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: 'cultural-origins-config',
+      title: 'Cultural Origins Configuration',
+      template: 'modules/aspects-dual-backgrounds/templates/config.html',
+      width: 720,
+      height: 'auto',
+      closeOnSubmit: true,
+      tabs: [{ navSelector: '.tabs', contentSelector: '.content', initial: 'origins' }]
+    });
+  }
+
+  async getData() {
+    const customOrigins = game.settings.get(DualBackgroundsManager.ID, 'customCulturalOrigins') || {};
+    const builtInOrigins = DualBackgroundsManager.CULTURAL_ORIGINS;
+
+    return {
+      builtInOrigins: Object.keys(builtInOrigins),
+      customOrigins: Object.entries(customOrigins).map(([name, data]) => ({
+        name,
+        ...data
+      }))
+    };
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+
+    html.find('.add-origin').click(this._onAddOrigin.bind(this));
+    html.find('.edit-origin').click(this._onEditOrigin.bind(this));
+    html.find('.delete-origin').click(this._onDeleteOrigin.bind(this));
+    html.find('.export-origins').click(this._onExportOrigins.bind(this));
+    html.find('.import-origins').click(this._onImportOrigins.bind(this));
+  }
+
+  async _onAddOrigin(event) {
+    event.preventDefault();
+    const editor = new CulturalOriginEditor(null);
+    editor.render(true);
+  }
+
+  async _onEditOrigin(event) {
+    event.preventDefault();
+    const originName = $(event.currentTarget).data('origin');
+    const customOrigins = game.settings.get(DualBackgroundsManager.ID, 'customCulturalOrigins') || {};
+    const originData = customOrigins[originName];
+
+    if (originData) {
+      const editor = new CulturalOriginEditor({ name: originName, ...originData });
+      editor.render(true);
+    }
+  }
+
+  async _onDeleteOrigin(event) {
+    event.preventDefault();
+    const originName = $(event.currentTarget).data('origin');
+
+    const confirmed = await Dialog.confirm({
+      title: 'Delete Cultural Origin',
+      content: `<p>Are you sure you want to delete <strong>${originName}</strong>?</p>`,
+      yes: () => true,
+      no: () => false
+    });
+
+    if (confirmed) {
+      const customOrigins = game.settings.get(DualBackgroundsManager.ID, 'customCulturalOrigins') || {};
+      delete customOrigins[originName];
+      await game.settings.set(DualBackgroundsManager.ID, 'customCulturalOrigins', customOrigins);
+      this.render();
+      ui.notifications.info(`Deleted ${originName}`);
+    }
+  }
+
+  async _onExportOrigins(event) {
+    event.preventDefault();
+    const customOrigins = game.settings.get(DualBackgroundsManager.ID, 'customCulturalOrigins') || {};
+    const dataStr = JSON.stringify(customOrigins, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cultural-origins.json';
+    link.click();
+  }
+
+  async _onImportOrigins(event) {
+    event.preventDefault();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = async (event) => {
+        try {
+          const importedOrigins = JSON.parse(event.target.result);
+          const customOrigins = game.settings.get(DualBackgroundsManager.ID, 'customCulturalOrigins') || {};
+          const merged = { ...customOrigins, ...importedOrigins };
+          await game.settings.set(DualBackgroundsManager.ID, 'customCulturalOrigins', merged);
+          this.render();
+          ui.notifications.info('Cultural origins imported successfully!');
+        } catch (err) {
+          ui.notifications.error('Failed to import cultural origins. Invalid JSON file.');
+          console.error(err);
+        }
+      };
+
+      reader.readAsText(file);
+    };
+
+    input.click();
+  }
+
+  async _updateObject(event, formData) {
+    // Form submission handled by individual editors
+  }
+}
+
+/**
+ * Editor form for a single cultural origin
+ */
+class CulturalOriginEditor extends FormApplication {
+  constructor(originData) {
+    super();
+    this.originData = originData || {
+      name: '',
+      skill: 'his',
+      mainFeature: { name: '', description: '' },
+      specialFeature: { name: '', description: '' },
+      culturalTrait: { name: '', description: '' },
+      equipment: []
+    };
+    this.isNew = !originData;
+  }
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: 'cultural-origin-editor',
+      title: 'Edit Cultural Origin',
+      template: 'modules/aspects-dual-backgrounds/templates/editor.html',
+      width: 600,
+      height: 'auto',
+      closeOnSubmit: true
+    });
+  }
+
+  getData() {
+    const skills = {
+      'acr': 'Acrobatics', 'ani': 'Animal Handling', 'arc': 'Arcana', 'ath': 'Athletics',
+      'dec': 'Deception', 'his': 'History', 'ins': 'Insight', 'itm': 'Intimidation',
+      'inv': 'Investigation', 'med': 'Medicine', 'nat': 'Nature', 'prc': 'Perception',
+      'prf': 'Performance', 'per': 'Persuasion', 'rel': 'Religion', 'slt': 'Sleight of Hand',
+      'ste': 'Stealth', 'sur': 'Survival'
+    };
+
+    return {
+      origin: this.originData,
+      skills: skills,
+      isNew: this.isNew
+    };
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+    html.find('.add-equipment').click(this._onAddEquipment.bind(this));
+    html.find('.remove-equipment').click(this._onRemoveEquipment.bind(this));
+  }
+
+  _onAddEquipment(event) {
+    event.preventDefault();
+    if (!this.originData.equipment) this.originData.equipment = [];
+    this.originData.equipment.push({ name: 'New Item', type: 'equipment' });
+    this.render();
+  }
+
+  _onRemoveEquipment(event) {
+    event.preventDefault();
+    const index = $(event.currentTarget).data('index');
+    this.originData.equipment.splice(index, 1);
+    this.render();
+  }
+
+  async _updateObject(event, formData) {
+    const customOrigins = game.settings.get(DualBackgroundsManager.ID, 'customCulturalOrigins') || {};
+
+    // Build origin object from form data
+    const originName = formData['name'];
+    const originObj = {
+      skill: formData['skill'],
+      mainFeature: {
+        name: formData['mainFeature.name'],
+        description: formData['mainFeature.description']
+      },
+      specialFeature: {
+        name: formData['specialFeature.name'],
+        description: formData['specialFeature.description']
+      },
+      culturalTrait: {
+        name: formData['culturalTrait.name'],
+        description: formData['culturalTrait.description']
+      },
+      equipment: []
+    };
+
+    // Parse equipment items
+    const equipmentNames = formData['equipment.name'];
+    const equipmentTypes = formData['equipment.type'];
+
+    if (Array.isArray(equipmentNames)) {
+      for (let i = 0; i < equipmentNames.length; i++) {
+        originObj.equipment.push({
+          name: equipmentNames[i],
+          type: equipmentTypes[i]
+        });
+      }
+    } else if (equipmentNames) {
+      originObj.equipment.push({
+        name: equipmentNames,
+        type: equipmentTypes
+      });
+    }
+
+    // Delete old name if renamed
+    if (!this.isNew && originName !== this.originData.name) {
+      delete customOrigins[this.originData.name];
+    }
+
+    customOrigins[originName] = originObj;
+    await game.settings.set(DualBackgroundsManager.ID, 'customCulturalOrigins', customOrigins);
+
+    ui.notifications.info(`${this.isNew ? 'Created' : 'Updated'} ${originName}`);
+
+    // Re-render the config window if it's open
+    Object.values(ui.windows).forEach(app => {
+      if (app instanceof CulturalOriginsConfig) {
+        app.render();
+      }
+    });
   }
 }
 
