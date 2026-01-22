@@ -94,24 +94,19 @@ class DualBackgroundsManager {
   static initialize() {
     this.log('Initializing Dual Backgrounds system');
 
-    // Add a test hook that logs ALL actor sheet renders
-    Hooks.on('renderActorSheet', (app, html, data) => {
-      this.log('=== HOOK FIRED: renderActorSheet ===');
-      this.log('App constructor name:', app.constructor.name);
-      this.log('Actor type:', app.actor.type);
-      this.log('Actor name:', app.actor.name);
-      this.log('HTML type:', html instanceof jQuery ? 'jQuery' : html instanceof HTMLElement ? 'HTMLElement' : typeof html);
-    });
+    // D&D 5e v5.2.4+ (Foundry v13) uses CharacterActorSheet
+    Hooks.on('renderCharacterActorSheet', this.onRenderActorSheet.bind(this));
 
-    // D&D 5e specific character sheet hooks
+    // Fallback for older versions
     Hooks.on('renderActorSheet5eCharacter', this.onRenderActorSheet.bind(this));
     Hooks.on('renderActorSheet5eCharacter2', this.onRenderActorSheet.bind(this));
+    Hooks.on('renderActorSheet', this.onRenderActorSheet.bind(this));
 
     // Hook for actor updates
     Hooks.on('preUpdateActor', this.onPreUpdateActor.bind(this));
 
     this.log('Dual Backgrounds system initialized');
-    this.log('Hooks registered - open a character sheet to see if hooks fire');
+    this.log('Hooks registered: renderCharacterActorSheet, renderActorSheet5eCharacter, renderActorSheet');
   }
 
   /**
