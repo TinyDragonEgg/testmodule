@@ -17,73 +17,131 @@ class DualBackgroundsManager {
   static CULTURAL_ORIGINS = {
     'Tharon Heritage': {
       skill: 'ath',
-      description: `You were raised in the Stratocracy of Tharon, where military service is the highest calling and honor guides all decisions.
+      mainFeature: {
+        name: 'Tharon Heritage',
+        description: `You were raised in the Stratocracy of Tharon, where military service is the highest calling and honor guides all decisions.
 
-      <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
+        <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
 
-      <strong>Equipment:</strong> Military dress uniform, regimental insignia, personal scales display (empty or with family's scales), and family military history document.
-
-      <strong>Feature: Military Connections</strong>
-      You understand Tharon's military hierarchy and protocols. You have contacts within the Stratocracy's military structure and can navigate military bureaucracy.
-
-      <strong>Cultural Trait: Honor Bound</strong>
-      You gain advantage on saving throws against being frightened when fighting alongside allies who share Tharon's military values.`
+        <strong>Equipment:</strong> Military dress uniform, regimental insignia, personal scales display (empty or with family's scales), and family military history document.`
+      },
+      specialFeature: {
+        name: 'Military Connections',
+        description: `You understand Tharon's military hierarchy and protocols. You have contacts within the Stratocracy's military structure and can navigate military bureaucracy.`
+      },
+      culturalTrait: {
+        name: 'Honor Bound',
+        description: `You gain advantage on saving throws against being frightened when fighting alongside allies who share Tharon's military values.`
+      },
+      equipment: [
+        { name: 'Military Dress Uniform', type: 'equipment' },
+        { name: 'Regimental Insignia', type: 'equipment' },
+        { name: 'Personal Scales Display', type: 'equipment' },
+        { name: 'Family Military History Document', type: 'loot' }
+      ]
     },
     'Kael Heritage': {
       skill: 'arc',
-      description: `You were raised in the Ascendancy of Kael, where scientific progress and technological superiority define worth.
+      mainFeature: {
+        name: 'Kael Heritage',
+        description: `You were raised in the Ascendancy of Kael, where scientific progress and technological superiority define worth.
 
-      <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
+        <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
 
-      <strong>Equipment:</strong> Scientific notebook, alchemical components, Kael citizenship papers, technical diagrams, and research notes.
-
-      <strong>Feature: Technical Knowledge</strong>
-      You understand Kael's advanced technology and magical sciences. You have contacts among Kael's research institutions and can identify Kael military equipment.
-
-      <strong>Cultural Trait: Analytical Mind</strong>
-      You can use Investigation instead of Insight when trying to determine if someone is lying or hiding something.`
+        <strong>Equipment:</strong> Scientific notebook, alchemical components, Kael citizenship papers, technical diagrams, and research notes.`
+      },
+      specialFeature: {
+        name: 'Technical Knowledge',
+        description: `You understand Kael's advanced technology and magical sciences. You have contacts among Kael's research institutions and can identify Kael military equipment.`
+      },
+      culturalTrait: {
+        name: 'Analytical Mind',
+        description: `You can use Investigation instead of Insight when trying to determine if someone is lying or hiding something.`
+      },
+      equipment: [
+        { name: 'Scientific Notebook', type: 'loot' },
+        { name: 'Alchemical Components', type: 'consumable' },
+        { name: 'Kael Citizenship Papers', type: 'loot' },
+        { name: 'Technical Diagrams', type: 'loot' },
+        { name: 'Research Notes', type: 'loot' }
+      ]
     },
     'Calthran Heritage': {
       skill: 'rel',
-      description: `You were raised in the Covenant of Calthran, where death is temporary and the eternal war justifies all sacrifices.
+      mainFeature: {
+        name: 'Calthran Heritage',
+        description: `You were raised in the Covenant of Calthran, where death is temporary and the eternal war justifies all sacrifices.
 
-      <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
+        <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
 
-      <strong>Equipment:</strong> Death cult religious symbol, resurrection tally marks, ceremonial blade, bone jewelry, and prayer beads.
-
-      <strong>Feature: Death Familiarity</strong>
-      You understand Calthran's necromantic resurrection systems and death-cult philosophy. You can navigate Calthran's religious hierarchy and identify resurrection facilities.
-
-      <strong>Cultural Trait: Death's Embrace</strong>
-      You have advantage on death saving throws and treat death as a temporary inconvenience rather than something to fear.`
+        <strong>Equipment:</strong> Death cult religious symbol, resurrection tally marks, ceremonial blade, bone jewelry, and prayer beads.`
+      },
+      specialFeature: {
+        name: 'Death Familiarity',
+        description: `You understand Calthran's necromantic resurrection systems and death-cult philosophy. You can navigate Calthran's religious hierarchy and identify resurrection facilities.`
+      },
+      culturalTrait: {
+        name: "Death's Embrace",
+        description: `You have advantage on death saving throws and treat death as a temporary inconvenience rather than something to fear.`
+      },
+      equipment: [
+        { name: 'Death Cult Religious Symbol', type: 'equipment' },
+        { name: 'Resurrection Tally Marks', type: 'loot' },
+        { name: 'Ceremonial Blade', type: 'weapon', weaponType: 'simpleM' },
+        { name: 'Bone Jewelry', type: 'equipment' },
+        { name: 'Prayer Beads', type: 'equipment' }
+      ]
     },
     'Ashland Heritage': {
       skill: 'sur',
-      description: `You were raised among the nomadic tribes of the Ashlands, surviving in the lawless volcanic wastes between the three major powers.
+      mainFeature: {
+        name: 'Ashland Heritage',
+        description: `You were raised among the nomadic tribes of the Ashlands, surviving in the lawless volcanic wastes between the three major powers.
 
-      <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
+        <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
 
-      <strong>Equipment:</strong> Nomadic traveling gear, tribal identification tokens, desert survival supplies, animal partnership tokens, and navigation tools.
-
-      <strong>Feature: Wasteland Navigation</strong>
-      You know how to survive in volcanic badlands and can find water, shelter, and resources in seemingly barren terrain. Nomad groups recognize and trust you.
-
-      <strong>Cultural Trait: Nomadic Resilience</strong>
-      You have advantage on saving throws against extreme temperatures and environmental hazards. You need only half the normal amount of water to avoid exhaustion.`
+        <strong>Equipment:</strong> Nomadic traveling gear, tribal identification tokens, desert survival supplies, animal partnership tokens, and navigation tools.`
+      },
+      specialFeature: {
+        name: 'Wasteland Navigation',
+        description: `You know how to survive in volcanic badlands and can find water, shelter, and resources in seemingly barren terrain. Nomad groups recognize and trust you.`
+      },
+      culturalTrait: {
+        name: 'Nomadic Resilience',
+        description: `You have advantage on saving throws against extreme temperatures and environmental hazards. You need only half the normal amount of water to avoid exhaustion.`
+      },
+      equipment: [
+        { name: 'Nomadic Traveling Gear', type: 'equipment' },
+        { name: 'Tribal Identification Tokens', type: 'loot' },
+        { name: 'Desert Survival Supplies', type: 'consumable' },
+        { name: 'Animal Partnership Tokens', type: 'loot' },
+        { name: 'Navigation Tools', type: 'tool' }
+      ]
     },
     "Lyra's Descendants": {
       skill: 'his',
-      description: `You are descended from Ly'ra of Kael, the immortal Artillery Witch whose power sustains Kaeltharyn's barrier. Many descendants don't know their lineage - the bloodline has spread across all factions over generations through both legitimate and illegitimate lines.
+      mainFeature: {
+        name: "Lyra's Descendants",
+        description: `You are descended from Ly'ra of Kael, the immortal Artillery Witch whose power sustains Kaeltharyn's barrier. Many descendants don't know their lineage - the bloodline has spread across all factions over generations through both legitimate and illegitimate lines.
 
-      <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
+        <strong>Language:</strong> You can speak, read, and write one additional language of your choice.
 
-      <strong>Equipment:</strong> Simple family heirloom (you may not know its significance), old letters or documents, worn traveling clothes, and a pouch containing 10 gp.
-
-      <strong>Feature: Hidden Bloodline</strong>
-      You may or may not know you're Lyra's descendant. If you discover or reveal your heritage, you gain recognition and reverence across Kaeltharyn factions. Artillery witches may sense something familiar about you. However, some may seek to use or control you because of your bloodline. Work with your DM to decide when/if you discover your heritage.
-
-      <strong>Cultural Trait: Latent Artillery Affinity</strong>
-      Whether you know your heritage or not, you have an innate understanding of destructive magic. When you cast a spell that deals damage, you can choose to have it deal force damage instead of its normal damage type (once per long rest). Additionally, you have advantage on Intelligence (Arcana) checks related to siege weapons or magical artillery.`
+        <strong>Equipment:</strong> Simple family heirloom (you may not know its significance), old letters or documents, worn traveling clothes, and a pouch containing 10 gp.`
+      },
+      specialFeature: {
+        name: 'Hidden Bloodline',
+        description: `You may or may not know you're Lyra's descendant. If you discover or reveal your heritage, you gain recognition and reverence across Kaeltharyn factions. Artillery witches may sense something familiar about you. However, some may seek to use or control you because of your bloodline. Work with your DM to decide when/if you discover your heritage.`
+      },
+      culturalTrait: {
+        name: 'Latent Artillery Affinity',
+        description: `Whether you know your heritage or not, you have an innate understanding of destructive magic. When you cast a spell that deals damage, you can choose to have it deal force damage instead of its normal damage type (once per long rest). Additionally, you have advantage on Intelligence (Arcana) checks related to siege weapons or magical artillery.`
+      },
+      equipment: [
+        { name: 'Simple Family Heirloom', type: 'loot' },
+        { name: 'Old Letters or Documents', type: 'loot' },
+        { name: 'Worn Traveling Clothes', type: 'equipment' },
+        { name: 'Pouch (10 gp)', type: 'loot' }
+      ]
     }
   };
 
@@ -222,22 +280,20 @@ class DualBackgroundsManager {
   }
 
   /**
-   * Apply cultural origin as a feature
+   * Apply cultural origin as 3 separate features + equipment
    */
   static async applyCulturalOrigin(actor, newOrigin, oldOrigin) {
     this.log(`Applying cultural origin: ${newOrigin} (was: ${oldOrigin})`);
 
-    // Remove old cultural origin feature
+    // Remove old cultural origin features and equipment
     if (oldOrigin) {
       const oldItems = actor.items.filter(item =>
-        item.type === 'feat' &&
-        item.name === oldOrigin &&
         item.flags?.[this.ID]?.isCulturalOrigin
       );
 
       if (oldItems.length > 0) {
         await actor.deleteEmbeddedDocuments('Item', oldItems.map(i => i.id));
-        this.log(`Removed old cultural origin feature`);
+        this.log(`Removed ${oldItems.length} old cultural origin items`);
       }
 
       // Remove skill proficiency from old origin
@@ -251,83 +307,158 @@ class DualBackgroundsManager {
     // Add new cultural origin
     if (newOrigin && newOrigin !== '' && this.CULTURAL_ORIGINS[newOrigin]) {
       const originData = this.CULTURAL_ORIGINS[newOrigin];
+      const itemsToCreate = [];
 
-      // Create the feature item
-      const featureData = {
-        name: newOrigin,
+      // Feature 1: Main cultural heritage feature
+      itemsToCreate.push({
+        name: originData.mainFeature.name,
         type: 'feat',
         img: 'icons/environment/people/group.webp',
         system: {
           description: {
-            value: originData.description,
+            value: originData.mainFeature.description,
             chat: '',
             unidentified: ''
           },
           source: 'Aspects of Verun',
-          activation: {
-            type: 'special',
-            cost: null,
-            condition: ''
-          },
-          duration: {
-            value: null,
-            units: ''
-          },
-          target: {
-            value: null,
-            width: null,
-            units: '',
-            type: ''
-          },
-          range: {
-            value: null,
-            long: null,
-            units: ''
-          },
-          uses: {
-            value: null,
-            max: '',
-            per: null,
-            recovery: ''
-          },
-          consume: {
-            type: '',
-            target: null,
-            amount: null
-          },
+          activation: { type: 'special', cost: null, condition: '' },
+          duration: { value: null, units: '' },
+          target: { value: null, width: null, units: '', type: '' },
+          range: { value: null, long: null, units: '' },
+          uses: { value: null, max: '', per: null, recovery: '' },
+          consume: { type: '', target: null, amount: null },
           ability: null,
           actionType: '',
           attackBonus: '',
           chatFlavor: '',
-          critical: {
-            threshold: null,
-            damage: ''
-          },
-          damage: {
-            parts: [],
-            versatile: ''
-          },
+          critical: { threshold: null, damage: '' },
+          damage: { parts: [], versatile: '' },
           formula: '',
-          save: {
-            ability: '',
-            dc: null,
-            scaling: 'spell'
-          },
+          save: { ability: '', dc: null, scaling: 'spell' },
           requirements: 'Cultural Origin',
-          recharge: {
-            value: null,
-            charged: false
-          }
+          recharge: { value: null, charged: false }
         },
         flags: {
           [this.ID]: {
             isCulturalOrigin: true,
-            skill: originData.skill
+            featureType: 'main'
           }
         }
-      };
+      });
 
-      await actor.createEmbeddedDocuments('Item', [featureData]);
+      // Feature 2: Special feature
+      itemsToCreate.push({
+        name: originData.specialFeature.name,
+        type: 'feat',
+        img: 'icons/sundries/books/book-symbol-eye.webp',
+        system: {
+          description: {
+            value: originData.specialFeature.description,
+            chat: '',
+            unidentified: ''
+          },
+          source: 'Aspects of Verun',
+          activation: { type: 'special', cost: null, condition: '' },
+          duration: { value: null, units: '' },
+          target: { value: null, width: null, units: '', type: '' },
+          range: { value: null, long: null, units: '' },
+          uses: { value: null, max: '', per: null, recovery: '' },
+          consume: { type: '', target: null, amount: null },
+          ability: null,
+          actionType: '',
+          attackBonus: '',
+          chatFlavor: '',
+          critical: { threshold: null, damage: '' },
+          damage: { parts: [], versatile: '' },
+          formula: '',
+          save: { ability: '', dc: null, scaling: 'spell' },
+          requirements: 'Cultural Origin',
+          recharge: { value: null, charged: false }
+        },
+        flags: {
+          [this.ID]: {
+            isCulturalOrigin: true,
+            featureType: 'special'
+          }
+        }
+      });
+
+      // Feature 3: Cultural trait
+      itemsToCreate.push({
+        name: originData.culturalTrait.name,
+        type: 'feat',
+        img: 'icons/magic/symbols/runes-star-pentagon-blue.webp',
+        system: {
+          description: {
+            value: originData.culturalTrait.description,
+            chat: '',
+            unidentified: ''
+          },
+          source: 'Aspects of Verun',
+          activation: { type: 'special', cost: null, condition: '' },
+          duration: { value: null, units: '' },
+          target: { value: null, width: null, units: '', type: '' },
+          range: { value: null, long: null, units: '' },
+          uses: { value: null, max: '', per: null, recovery: '' },
+          consume: { type: '', target: null, amount: null },
+          ability: null,
+          actionType: '',
+          attackBonus: '',
+          chatFlavor: '',
+          critical: { threshold: null, damage: '' },
+          damage: { parts: [], versatile: '' },
+          formula: '',
+          save: { ability: '', dc: null, scaling: 'spell' },
+          requirements: 'Cultural Origin',
+          recharge: { value: null, charged: false }
+        },
+        flags: {
+          [this.ID]: {
+            isCulturalOrigin: true,
+            featureType: 'trait'
+          }
+        }
+      });
+
+      // Add equipment items
+      if (originData.equipment) {
+        for (const equipItem of originData.equipment) {
+          const itemData = {
+            name: equipItem.name,
+            type: equipItem.type,
+            img: this.getEquipmentIcon(equipItem.type),
+            system: {
+              description: { value: '', chat: '', unidentified: '' },
+              source: 'Aspects of Verun',
+              quantity: 1,
+              weight: 0,
+              price: { value: 0, denomination: 'gp' },
+              attunement: 0,
+              equipped: false,
+              rarity: '',
+              identified: true
+            },
+            flags: {
+              [this.ID]: {
+                isCulturalOrigin: true,
+                featureType: 'equipment'
+              }
+            }
+          };
+
+          // Special handling for weapons
+          if (equipItem.type === 'weapon' && equipItem.weaponType) {
+            itemData.system.weaponType = equipItem.weaponType;
+            itemData.system.properties = {};
+          }
+
+          itemsToCreate.push(itemData);
+        }
+      }
+
+      // Create all items at once
+      await actor.createEmbeddedDocuments('Item', itemsToCreate);
+      this.log(`Created ${itemsToCreate.length} items for ${newOrigin}`);
 
       // Add skill proficiency
       if (originData.skill) {
@@ -336,9 +467,23 @@ class DualBackgroundsManager {
         this.log(`Added ${originData.skill} proficiency`);
       }
 
-      ui.notifications.info(`Applied ${newOrigin}. Remember to add your language manually!`);
+      ui.notifications.info(`Applied ${newOrigin}. Remember to select your language!`);
       this.log('Cultural origin applied successfully');
     }
+  }
+
+  /**
+   * Get appropriate icon for equipment type
+   */
+  static getEquipmentIcon(type) {
+    const icons = {
+      'weapon': 'icons/weapons/swords/sword-broad-steel.webp',
+      'equipment': 'icons/containers/bags/pack-leather-white-tan.webp',
+      'loot': 'icons/sundries/documents/document-sealed-brown-red.webp',
+      'consumable': 'icons/consumables/potions/bottle-round-corked-purple.webp',
+      'tool': 'icons/tools/hand/hammer-simple-metal-brown.webp'
+    };
+    return icons[type] || 'icons/sundries/misc/box-wooden.webp';
   }
 }
 
