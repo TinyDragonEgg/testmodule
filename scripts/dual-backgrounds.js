@@ -1,6 +1,10 @@
 /**
  * Aspects of Verun: Dual Backgrounds Module
  * Enables characters to have both a Profession background and a Cultural Origin feature
+ *
+ * Based on research from:
+ * - https://foundryvtt.wiki/en/development/guides/adding-inputs
+ * - https://foundryvtt.com/api/modules/hookEvents.html
  */
 
 class DualBackgroundsManager {
@@ -90,11 +94,10 @@ class DualBackgroundsManager {
   static initialize() {
     this.log('Initializing Dual Backgrounds system');
 
-    // Hook for character sheets
-    Hooks.on('renderActorSheet5eCharacter', this.onRenderActorSheet.bind(this));
-    Hooks.on('renderActorSheet5eCharacter2', this.onRenderActorSheet.bind(this));
+    // Hook for rendering actor sheets - works for both V1 and V2
     Hooks.on('renderActorSheet', this.onRenderActorSheet.bind(this));
 
+    // Hook for actor updates
     Hooks.on('preUpdateActor', this.onPreUpdateActor.bind(this));
 
     this.log('Dual Backgrounds system initialized');
@@ -110,25 +113,14 @@ class DualBackgroundsManager {
     if (actor.type !== 'character') return;
 
     this.log('Rendering on character sheet for', actor.name);
+    this.log('HTML element type:', html instanceof jQuery ? 'jQuery' : 'HTMLElement');
 
-    // Try to find the traits/biography section
-    let targetElement = html.find('.tab[data-tab="details"] .traits').first();
+    // Check if already added to prevent duplicates
+    const existing = html instanceof jQuery
+      ? html.find('.cultural-origin-group').length > 0
+      : html.querySelector('.cultural-origin-group');
 
-    if (!targetElement.length) {
-      targetElement = html.find('.tab[data-tab="biography"]').first();
-    }
-
-    if (!targetElement.length) {
-      targetElement = html.find('.details').first();
-    }
-
-    if (!targetElement.length) {
-      this.log('Could not find suitable location. Aborting.');
-      return;
-    }
-
-    // Check if already added
-    if (html.find('.cultural-origin-group').length > 0) {
+    if (existing) {
       this.log('Cultural origin selector already present');
       return;
     }
@@ -136,24 +128,73 @@ class DualBackgroundsManager {
     // Get current cultural origin
     const culturalOrigin = actor.getFlag(this.ID, this.FLAGS.CULTURAL_ORIGIN) || '';
 
-    // Create cultural origin selector
+    // Create cultural origin selector HTML
     const culturalOriginHTML = `
-      <div class="form-group cultural-origin-group">
-        <label>Cultural Origin</label>
-        <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String">
+      <div class="form-group cultural-origin-group" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px;">
+        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Cultural Origin</label>
+        <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String" style="width: 100%;">
           <option value="">None</option>
           ${Object.keys(this.CULTURAL_ORIGINS).map(origin => `
             <option value="${origin}" ${culturalOrigin === origin ? 'selected' : ''}>${origin}</option>
           `).join('')}
         </select>
-        <p class="hint">Choose your cultural heritage in addition to your profession background</p>
+        <p class="hint" style="font-size: 0.85em; font-style: italic; margin-top: 4px;">Choose your cultural heritage in addition to your profession background</p>
       </div>
     `;
 
-    // Insert the selector
-    targetElement.prepend(culturalOriginHTML);
+    // Try multiple insertion points
+    let inserted = false;
 
-    this.log('Cultural origin selector added');
+    if (html instanceof jQuery) {
+      // jQuery version (V1 sheets)
+      const selectors = [
+        '.tab.biography',
+        '.tab[data-tab="biography"]',
+        '.sheet-body .tab.biography',
+        '.biography',
+        '.tab.description'
+      ];
+
+      for (const selector of selectors) {
+        const target = html.find(selector).first();
+        if (target.length) {
+          target.prepend(culturalOriginHTML);
+          this.log(`Inserted via jQuery selector: ${selector}`);
+          inserted = true;
+          break;
+        }
+      }
+    } else {
+      // Vanilla JS version (V2 sheets)
+      const selectors = [
+        '.tab.biography',
+        '.tab[data-tab="biography"]',
+        '.sheet-body .tab.biography',
+        '.biography',
+        '.tab.description',
+        '[data-tab="biography"]'
+      ];
+
+      for (const selector of selectors) {
+        const target = html.querySelector(selector);
+        if (target) {
+          target.insertAdjacentHTML('afterbegin', culturalOriginHTML);
+          this.log(`Inserted via selector: ${selector}`);
+          inserted = true;
+          break;
+        }
+      }
+    }
+
+    if (!inserted) {
+      this.log('WARNING: Could not find suitable location to insert cultural origin selector');
+      this.log('Available selectors:', html instanceof jQuery
+        ? Array.from(html.find('*')).slice(0, 20).map(el => el.className)
+        : Array.from(html.querySelectorAll('*')).slice(0, 20).map(el => el.className)
+      );
+    } else {
+      this.log('Cultural origin selector added successfully');
+    }
   }
 
   /**
