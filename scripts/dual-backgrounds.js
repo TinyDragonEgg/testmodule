@@ -223,8 +223,14 @@ class DualBackgroundsManager {
     // Get all cultural origins (built-in + custom)
     const allOrigins = this.getAllCulturalOrigins();
 
-    // Create cultural origin selector HTML
-    const culturalOriginHTML = `
+    // Check if sheet is in edit mode (editable property exists in data object)
+    const isEditable = data.editable !== false;
+
+    // Get the display name for the current origin
+    const displayName = culturalOrigin || 'None';
+
+    // Create cultural origin selector HTML (edit mode) or display HTML (view mode)
+    const culturalOriginHTML = isEditable ? `
       <div class="form-group cultural-origin-group" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px;">
         <label style="font-weight: bold; display: block; margin-bottom: 5px;">Cultural Origin</label>
         <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String" style="width: 100%;">
@@ -234,6 +240,12 @@ class DualBackgroundsManager {
           `).join('')}
         </select>
         <p class="hint" style="font-size: 0.85em; font-style: italic; margin-top: 4px;">Choose your cultural heritage in addition to your profession background</p>
+      </div>
+    ` : `
+      <div class="form-group cultural-origin-group" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px;">
+        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Cultural Origin</label>
+        <div style="padding: 6px 0; font-size: 1em;">${displayName}</div>
+        <p class="hint" style="font-size: 0.85em; font-style: italic; margin-top: 4px; color: #666;">Your cultural heritage (click Edit to change)</p>
       </div>
     `;
 
