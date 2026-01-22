@@ -467,9 +467,70 @@ class DualBackgroundsManager {
         this.log(`Added ${originData.skill} proficiency`);
       }
 
-      ui.notifications.info(`Applied ${newOrigin}. Remember to select your language!`);
+      // Show language selection dialog
+      const selectedLanguage = await this.showLanguageDialog();
+      if (selectedLanguage) {
+        // Add language to actor's traits
+        const currentLanguages = actor.system.traits?.languages?.value || [];
+        if (!currentLanguages.includes(selectedLanguage.toLowerCase())) {
+          const languagesPath = 'system.traits.languages.value';
+          const updatedLanguages = [...currentLanguages, selectedLanguage.toLowerCase()];
+          await actor.update({ [languagesPath]: updatedLanguages });
+          this.log(`Added language: ${selectedLanguage}`);
+          ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
+        } else {
+          ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+        }
+      } else {
+        ui.notifications.info(`Applied ${newOrigin}. Add your language manually from the character sheet.`);
+      }
+
       this.log('Cultural origin applied successfully');
     }
+  }
+
+  /**
+   * Show language selection dialog
+   */
+  static async showLanguageDialog() {
+    return new Promise((resolve) => {
+      const languages = [
+        'Common', 'Dwarvish', 'Elvish', 'Giant', 'Gnomish', 'Goblin', 'Halfling', 'Orc',
+        'Abyssal', 'Celestial', 'Draconic', 'Deep Speech', 'Infernal', 'Primordial', 'Sylvan', 'Undercommon'
+      ];
+
+      const content = `
+        <form>
+          <div class="form-group">
+            <label>Choose your bonus language:</label>
+            <select id="language-select" style="width: 100%; margin-top: 8px;">
+              ${languages.map(lang => `<option value="${lang}">${lang}</option>`).join('')}
+            </select>
+          </div>
+        </form>
+      `;
+
+      new Dialog({
+        title: 'Choose Language',
+        content: content,
+        buttons: {
+          confirm: {
+            icon: '<i class="fas fa-check"></i>',
+            label: 'Confirm',
+            callback: (html) => {
+              const selected = html.find('#language-select').val();
+              resolve(selected);
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: 'Skip',
+            callback: () => resolve(null)
+          }
+        },
+        default: 'confirm'
+      }).render(true);
+    });
   }
 
   /**
