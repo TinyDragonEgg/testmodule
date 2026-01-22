@@ -1,0 +1,60 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'module.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get version from module.json
+        id: get_version
+        run: |
+          VERSION=$(cat module.json | grep -o '"version": *"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view "v${{ steps.get_version.outputs.version }}" &> /dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create module.zip
+        if: steps.check_release.outputs.exists == 'false'
+        run: |
+          zip -r module.zip module.json README.md scripts/ styles/ lang/ -x "*.git*"
+
+      - name: Create Release
+        if: steps.check_release.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.version }}
+          name: v${{ steps.get_version.outputs.version }}
+          body: |
+            ## Aspects of Verun: Dual Backgrounds v${{ steps.get_version.outputs.version }}
+
+            Automatic release created from module.json version bump.
+
+            ### Installation
+            Use this manifest URL in Foundry VTT:
+            ```
+            https://raw.githubusercontent.com/${{ github.repository }}/main/module.json
+            ```
+          files: module.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
