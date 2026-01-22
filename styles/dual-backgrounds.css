@@ -1,0 +1,38 @@
+/* Cultural Origin Selector Styling */
+.cultural-origin-group {
+  margin-top: 10px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #4b4a44;
+}
+
+.cultural-origin-group label {
+  font-weight: bold;
+  color: #f0f0e0;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.cultural-origin-group select {
+  width: 100%;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #7a7971;
+  color: #f0f0e0;
+  border-radius: 3px;
+}
+
+.cultural-origin-group .hint {
+  font-size: 0.85em;
+  font-style: italic;
+  color: #b5b3a4;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+/* Highlight cultural origin features */
+.item[data-item-id*="Heritage"] .item-name {
+  border-left: 3px solid #9f6b53;
+  padding-left: 8px;
+}

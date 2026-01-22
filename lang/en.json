@@ -1,0 +1,9 @@
+{
+  "ASPECTS_DUAL_BACKGROUNDS": {
+    "CulturalOrigin": "Cultural Origin",
+    "CulturalOriginHint": "Choose your cultural heritage in addition to your profession background",
+    "NoCulturalOrigin": "None",
+    "Applied": "Applied {origin} to character",
+    "NotFound": "Could not find background: {origin}. Make sure it's imported via Plutonium."
+  }
+}
