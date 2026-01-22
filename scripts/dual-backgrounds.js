@@ -94,24 +94,18 @@ class DualBackgroundsManager {
   static initialize() {
     this.log('Initializing Dual Backgrounds system');
 
-    // Try multiple hooks to catch different sheet versions
-    Hooks.on('renderActorSheet', this.onRenderActorSheet.bind(this));
-    Hooks.on('renderActorSheet5e', this.onRenderActorSheet.bind(this));
+    // D&D 5e specific character sheet hooks (v4.4.x for Foundry v12)
     Hooks.on('renderActorSheet5eCharacter', this.onRenderActorSheet.bind(this));
+    Hooks.on('renderActorSheet5eCharacter2', this.onRenderActorSheet.bind(this));
 
-    // Generic test to see if ANY actor sheet opens
-    Hooks.on('renderActorSheet', (app, html, data) => {
-      this.log('HOOK FIRED: renderActorSheet');
-      this.log('Actor type:', app.actor.type);
-      this.log('Actor name:', app.actor.name);
-      this.log('Sheet constructor:', app.constructor.name);
-    });
+    // Fallback to generic hooks
+    Hooks.on('renderActorSheet', this.onRenderActorSheet.bind(this));
 
     // Hook for actor updates
     Hooks.on('preUpdateActor', this.onPreUpdateActor.bind(this));
 
     this.log('Dual Backgrounds system initialized');
-    this.log('Hooks registered - waiting for character sheet to open');
+    this.log('Registered hooks: renderActorSheet5eCharacter, renderActorSheet5eCharacter2, renderActorSheet');
   }
 
   /**
