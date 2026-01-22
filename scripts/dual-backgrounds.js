@@ -94,13 +94,24 @@ class DualBackgroundsManager {
   static initialize() {
     this.log('Initializing Dual Backgrounds system');
 
-    // Hook for rendering actor sheets - works for both V1 and V2
+    // Try multiple hooks to catch different sheet versions
     Hooks.on('renderActorSheet', this.onRenderActorSheet.bind(this));
+    Hooks.on('renderActorSheet5e', this.onRenderActorSheet.bind(this));
+    Hooks.on('renderActorSheet5eCharacter', this.onRenderActorSheet.bind(this));
+
+    // Generic test to see if ANY actor sheet opens
+    Hooks.on('renderActorSheet', (app, html, data) => {
+      this.log('HOOK FIRED: renderActorSheet');
+      this.log('Actor type:', app.actor.type);
+      this.log('Actor name:', app.actor.name);
+      this.log('Sheet constructor:', app.constructor.name);
+    });
 
     // Hook for actor updates
     Hooks.on('preUpdateActor', this.onPreUpdateActor.bind(this));
 
     this.log('Dual Backgrounds system initialized');
+    this.log('Hooks registered - waiting for character sheet to open');
   }
 
   /**
