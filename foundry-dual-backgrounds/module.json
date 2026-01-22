@@ -1,0 +1,54 @@
+{
+  "id": "aspects-dual-backgrounds",
+  "title": "Aspects of Verun: Dual Backgrounds",
+  "description": "Enables dual background system for Aspects of Verun setting - choose one Profession background and one Cultural Origin background",
+  "version": "1.0.0",
+  "compatibility": {
+    "minimum": "11",
+    "verified": "12"
+  },
+  "authors": [
+    {
+      "name": "Yahya",
+      "flags": {}
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "dnd5e",
+        "type": "system",
+        "compatibility": {
+          "minimum": "3.0.0"
+        }
+      }
+    ],
+    "requires": [
+      {
+        "id": "plutonium",
+        "type": "module",
+        "compatibility": {
+          "minimum": "1.0.0"
+        }
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/dual-backgrounds.js"
+  ],
+  "styles": [
+    "styles/dual-backgrounds.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "url": "https://github.com/YOUR-USERNAME/foundry-dual-backgrounds",
+  "manifest": "https://raw.githubusercontent.com/YOUR-USERNAME/foundry-dual-backgrounds/main/module.json",
+  "download": "https://github.com/YOUR-USERNAME/foundry-dual-backgrounds/releases/latest/download/module.zip",
+  "license": "MIT",
+  "readme": "https://raw.githubusercontent.com/YOUR-USERNAME/foundry-dual-backgrounds/main/README.md"
+}
