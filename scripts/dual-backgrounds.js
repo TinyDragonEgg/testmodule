@@ -322,14 +322,14 @@ class DualBackgroundsManager {
 
       // Remove old skill proficiency
       if (oldCulturalOrigin && allOrigins[oldCulturalOrigin]?.skill) {
-        const oldSkillPath = `system.skills.${allOrigins[oldCulturalOrigin].skill}.proficient`;
+        const oldSkillPath = `system.skills.${allOrigins[oldCulturalOrigin].skill}.value`;
         foundry.utils.setProperty(changes, oldSkillPath, 0);
         this.log(`Removing old skill: ${allOrigins[oldCulturalOrigin].skill}`);
       }
 
       // Add new skill proficiency
       if (newCulturalOrigin && allOrigins[newCulturalOrigin]?.skill) {
-        const skillPath = `system.skills.${allOrigins[newCulturalOrigin].skill}.proficient`;
+        const skillPath = `system.skills.${allOrigins[newCulturalOrigin].skill}.value`;
         foundry.utils.setProperty(changes, skillPath, 1);
         this.log(`Adding skill proficiency in update: ${allOrigins[newCulturalOrigin].skill} at path ${skillPath}`);
         this.log(`Changes object after skill set:`, changes);
@@ -348,7 +348,7 @@ class DualBackgroundsManager {
   static async applyCulturalOriginFeatures(actor, newOrigin, oldOrigin) {
     this.log(`Applying cultural origin features: ${newOrigin} (was: ${oldOrigin})`);
 
-    // Remove old cultural origin features and equipment
+    // Remove old cultural origin features, equipment, and language
     if (oldOrigin) {
       const oldItems = actor.items.filter(item =>
         item.flags?.[this.ID]?.isCulturalOrigin
@@ -357,6 +357,12 @@ class DualBackgroundsManager {
       if (oldItems.length > 0) {
         await actor.deleteEmbeddedDocuments('Item', oldItems.map(i => i.id));
         this.log(`Removed ${oldItems.length} old cultural origin items`);
+      }
+
+      // Remove old language
+      const allOrigins = this.getAllCulturalOrigins();
+      if (oldOrigin && allOrigins[oldOrigin]?.languages) {
+        await this.removeLanguageFromActor(actor, allOrigins[oldOrigin].languages);
       }
     }
 
@@ -610,6 +616,46 @@ class DualBackgroundsManager {
       }
 
       this.log('Cultural origin applied successfully');
+    }
+  }
+
+  /**
+   * Remove a language from an actor
+   */
+  static async removeLanguageFromActor(actor, languagesToRemove) {
+    if (!languagesToRemove || languagesToRemove.length === 0) return;
+
+    try {
+      // Get fresh actor data
+      const currentActor = game.actors.get(actor.id);
+      const currentLanguages = currentActor.system.traits?.languages?.value;
+
+      if (!currentLanguages) return;
+
+      let updatedLanguages = [];
+
+      // Convert language names to keys
+      const languageKeysToRemove = languagesToRemove.map(lang => lang.toLowerCase());
+
+      if (currentLanguages instanceof Set) {
+        // v5.2.4+ uses Set
+        updatedLanguages = Array.from(currentLanguages).filter(lang =>
+          !languageKeysToRemove.includes(lang) && !languageKeysToRemove.includes(lang.toLowerCase())
+        );
+        this.log(`Removed languages from Set:`, languageKeysToRemove);
+      } else if (Array.isArray(currentLanguages)) {
+        // Older versions use Array
+        updatedLanguages = currentLanguages.filter(lang =>
+          !languageKeysToRemove.includes(lang) && !languageKeysToRemove.includes(lang.toLowerCase())
+        );
+        this.log(`Removed languages from Array:`, languageKeysToRemove);
+      }
+
+      await currentActor.update({ 'system.traits.languages.value': updatedLanguages });
+      this.log(`Successfully removed languages:`, languagesToRemove);
+    } catch (err) {
+      this.log('Error removing languages:', err);
+      console.error(err);
     }
   }
 
