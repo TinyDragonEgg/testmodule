@@ -229,23 +229,19 @@ class DualBackgroundsManager {
     // Get the display name for the current origin
     const displayName = culturalOrigin || 'None';
 
-    // Create cultural origin selector HTML (edit mode) or display HTML (view mode)
-    const culturalOriginHTML = isEditable ? `
-      <div class="form-group cultural-origin-group" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px;">
-        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Cultural Origin</label>
-        <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String" style="width: 100%;">
-          <option value="">None</option>
-          ${Object.keys(allOrigins).map(origin => `
-            <option value="${origin}" ${culturalOrigin === origin ? 'selected' : ''}>${origin}</option>
-          `).join('')}
-        </select>
-        <p class="hint" style="font-size: 0.85em; font-style: italic; margin-top: 4px;">Choose your cultural heritage in addition to your profession background</p>
-      </div>
-    ` : `
-      <div class="form-group cultural-origin-group" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 4px;">
-        <label style="font-weight: bold; display: block; margin-bottom: 5px;">Cultural Origin</label>
-        <div style="padding: 6px 0; font-size: 1em;">${displayName}</div>
-        <p class="hint" style="font-size: 0.85em; font-style: italic; margin-top: 4px; color: #666;">Your cultural heritage (click Edit to change)</p>
+    // Create cultural origin selector HTML matching Foundry's style
+    const culturalOriginHTML = `
+      <div class="form-group stacked cultural-origin-group">
+        <label>Cultural Origin</label>
+        <div class="form-fields">
+          <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String">
+            <option value="">None</option>
+            ${Object.keys(allOrigins).map(origin => `
+              <option value="${origin}" ${culturalOrigin === origin ? 'selected' : ''}>${origin}</option>
+            `).join('')}
+          </select>
+        </div>
+        <p class="hint">Choose your cultural heritage in addition to your profession background</p>
       </div>
     `;
 
