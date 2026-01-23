@@ -360,9 +360,10 @@ class DualBackgroundsManager {
       }
 
       // Remove old language
-      const allOrigins = this.getAllCulturalOrigins();
-      if (oldOrigin && allOrigins[oldOrigin]?.languages) {
-        await this.removeLanguageFromActor(actor, allOrigins[oldOrigin].languages);
+      const selectedLanguage = actor.getFlag(this.ID, 'selectedLanguage');
+      if (selectedLanguage) {
+        this.log(`Removing previously selected language: ${selectedLanguage}`);
+        await this.removeLanguageFromActor(actor, [selectedLanguage]);
       }
     }
 
@@ -602,7 +603,10 @@ class DualBackgroundsManager {
             ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
           } else {
             this.log('Updating actor with languages:', updatedLanguages);
-            await currentActor.update({ 'system.traits.languages.value': updatedLanguages });
+            await currentActor.update({
+              'system.traits.languages.value': updatedLanguages,
+              [`flags.${this.ID}.selectedLanguage`]: languageKey  // Store which language was selected
+            });
             this.log(`Successfully added language: ${selectedLanguage}`);
             ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
           }
