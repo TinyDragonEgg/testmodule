@@ -362,30 +362,37 @@ class DualBackgroundsManager {
         system: {
           description: {
             value: originData.mainFeature.description,
-            chat: '',
-            unidentified: ''
+            chat: ''
           },
-          source: 'Aspects of Verun',
+          source: {
+            custom: 'Aspects of Verun',
+            book: '',
+            page: '',
+            license: '',
+            rules: '2014',
+            revision: 1
+          },
           type: {
             value: 'background',
             subtype: ''
           },
-          activation: { type: '', cost: null, condition: '' },
-          duration: { value: null, units: '' },
-          target: { value: null, width: null, units: '', type: '' },
-          range: { value: null, long: null, units: '' },
-          uses: { value: null, max: '', per: null, recovery: '' },
-          consume: { type: '', target: null, amount: null },
-          ability: null,
-          actionType: '',
-          attackBonus: '',
-          chatFlavor: '',
-          critical: { threshold: null, damage: '' },
-          damage: { parts: [], versatile: '' },
-          formula: '',
-          save: { ability: '', dc: null, scaling: 'spell' },
-          requirements: 'Cultural Origin',
-          recharge: { value: null, charged: false }
+          properties: [],
+          uses: {
+            max: '',
+            recovery: [],
+            spent: 0
+          },
+          advancement: [],
+          activities: {},
+          identifier: originData.mainFeature.name.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
+          crewed: false,
+          enchant: {},
+          prerequisites: {
+            items: [],
+            repeatable: false,
+            level: null
+          },
+          requirements: 'Cultural Origin'
         },
         flags: {
           [this.ID]: {
@@ -403,30 +410,37 @@ class DualBackgroundsManager {
         system: {
           description: {
             value: originData.specialFeature.description,
-            chat: '',
-            unidentified: ''
+            chat: ''
           },
-          source: 'Aspects of Verun',
+          source: {
+            custom: 'Aspects of Verun',
+            book: '',
+            page: '',
+            license: '',
+            rules: '2014',
+            revision: 1
+          },
           type: {
             value: 'background',
             subtype: ''
           },
-          activation: { type: '', cost: null, condition: '' },
-          duration: { value: null, units: '' },
-          target: { value: null, width: null, units: '', type: '' },
-          range: { value: null, long: null, units: '' },
-          uses: { value: null, max: '', per: null, recovery: '' },
-          consume: { type: '', target: null, amount: null },
-          ability: null,
-          actionType: '',
-          attackBonus: '',
-          chatFlavor: '',
-          critical: { threshold: null, damage: '' },
-          damage: { parts: [], versatile: '' },
-          formula: '',
-          save: { ability: '', dc: null, scaling: 'spell' },
-          requirements: 'Cultural Origin',
-          recharge: { value: null, charged: false }
+          properties: [],
+          uses: {
+            max: '',
+            recovery: [],
+            spent: 0
+          },
+          advancement: [],
+          activities: {},
+          identifier: originData.specialFeature.name.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
+          crewed: false,
+          enchant: {},
+          prerequisites: {
+            items: [],
+            repeatable: false,
+            level: null
+          },
+          requirements: 'Cultural Origin'
         },
         flags: {
           [this.ID]: {
@@ -444,30 +458,37 @@ class DualBackgroundsManager {
         system: {
           description: {
             value: originData.culturalTrait.description,
-            chat: '',
-            unidentified: ''
+            chat: ''
           },
-          source: 'Aspects of Verun',
+          source: {
+            custom: 'Aspects of Verun',
+            book: '',
+            page: '',
+            license: '',
+            rules: '2014',
+            revision: 1
+          },
           type: {
             value: 'background',
             subtype: ''
           },
-          activation: { type: '', cost: null, condition: '' },
-          duration: { value: null, units: '' },
-          target: { value: null, width: null, units: '', type: '' },
-          range: { value: null, long: null, units: '' },
-          uses: { value: null, max: '', per: null, recovery: '' },
-          consume: { type: '', target: null, amount: null },
-          ability: null,
-          actionType: '',
-          attackBonus: '',
-          chatFlavor: '',
-          critical: { threshold: null, damage: '' },
-          damage: { parts: [], versatile: '' },
-          formula: '',
-          save: { ability: '', dc: null, scaling: 'spell' },
-          requirements: 'Cultural Origin',
-          recharge: { value: null, charged: false }
+          properties: [],
+          uses: {
+            max: '',
+            recovery: [],
+            spent: 0
+          },
+          advancement: [],
+          activities: {},
+          identifier: originData.culturalTrait.name.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
+          crewed: false,
+          enchant: {},
+          prerequisites: {
+            items: [],
+            repeatable: false,
+            level: null
+          },
+          requirements: 'Cultural Origin'
         },
         flags: {
           [this.ID]: {
