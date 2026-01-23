@@ -330,26 +330,24 @@ class DualBackgroundsManager {
 
     const oldCulturalOrigin = actor.getFlag(this.ID, this.FLAGS.CULTURAL_ORIGIN);
 
-    // If cultural origin is changing, add skill and language to this update
+    // If cultural origin is changing, handle skill changes
     if (newCulturalOrigin !== oldCulturalOrigin) {
       const allOrigins = this.getAllCulturalOrigins();
 
-      // Remove old skill proficiency
-      if (oldCulturalOrigin && allOrigins[oldCulturalOrigin]?.skill) {
-        const oldSkillPath = `system.skills.${allOrigins[oldCulturalOrigin].skill}.value`;
-        foundry.utils.setProperty(changes, oldSkillPath, 0);
-        this.log(`Removing old skill: ${allOrigins[oldCulturalOrigin].skill}`);
+      // Remove old skill proficiency (use the tracked skill, not the default)
+      if (oldCulturalOrigin) {
+        const trackedSkill = actor.getFlag(this.ID, 'selectedSkill');
+        if (trackedSkill) {
+          const oldSkillPath = `system.skills.${trackedSkill}.value`;
+          foundry.utils.setProperty(changes, oldSkillPath, 0);
+          this.log(`Removing tracked skill: ${trackedSkill}`);
+        }
       }
 
-      // Add new skill proficiency
-      if (newCulturalOrigin && allOrigins[newCulturalOrigin]?.skill) {
-        const skillPath = `system.skills.${allOrigins[newCulturalOrigin].skill}.value`;
-        foundry.utils.setProperty(changes, skillPath, 1);
-        this.log(`Adding skill proficiency in update: ${allOrigins[newCulturalOrigin].skill} at path ${skillPath}`);
-        this.log(`Changes object after skill set:`, changes);
-      }
+      // Don't add new skill here - we need to check if it's already known first
+      // This will be handled in applyCulturalOriginFeatures after the update completes
 
-      // Schedule features/equipment/language to be applied after update completes
+      // Schedule features/equipment/language/skill to be applied after update completes
       setTimeout(() => {
         this.applyCulturalOriginFeatures(actor, newCulturalOrigin, oldCulturalOrigin);
       }, 100);
@@ -385,6 +383,33 @@ class DualBackgroundsManager {
     const allOrigins = this.getAllCulturalOrigins();
     if (newOrigin && newOrigin !== '' && allOrigins[newOrigin]) {
       const originData = allOrigins[newOrigin];
+
+      // Handle skill selection - check if default skill is already proficient
+      const defaultSkill = originData.skill;
+      const currentActor = game.actors.get(actor.id);
+      const currentSkillValue = currentActor.system.skills[defaultSkill]?.value || 0;
+
+      let selectedSkill = defaultSkill;
+
+      if (currentSkillValue >= 1) {
+        // Skill already known, offer alternative
+        this.log(`Skill ${defaultSkill} already proficient, offering alternatives`);
+        selectedSkill = await this.showSkillSelectionDialog(defaultSkill);
+
+        if (!selectedSkill) {
+          // User cancelled, still use default
+          selectedSkill = defaultSkill;
+        }
+      }
+
+      // Apply the selected skill
+      if (selectedSkill) {
+        await currentActor.update({
+          [`system.skills.${selectedSkill}.value`]: 1,
+          [`flags.${this.ID}.selectedSkill`]: selectedSkill
+        });
+        this.log(`Applied skill proficiency: ${selectedSkill}`);
+      }
       const itemsToCreate = [];
 
       // Feature 1: Main cultural heritage feature
@@ -675,6 +700,61 @@ class DualBackgroundsManager {
       this.log('Error removing languages:', err);
       console.error(err);
     }
+  }
+
+  /**
+   * Show skill selection dialog when default skill is already known
+   */
+  static async showSkillSelectionDialog(defaultSkill) {
+    return new Promise((resolve) => {
+      const skills = {
+        'acr': 'Acrobatics', 'ani': 'Animal Handling', 'arc': 'Arcana', 'ath': 'Athletics',
+        'dec': 'Deception', 'his': 'History', 'ins': 'Insight', 'itm': 'Intimidation',
+        'inv': 'Investigation', 'med': 'Medicine', 'nat': 'Nature', 'prc': 'Perception',
+        'prf': 'Performance', 'per': 'Persuasion', 'rel': 'Religion', 'slt': 'Sleight of Hand',
+        'ste': 'Stealth', 'sur': 'Survival'
+      };
+
+      const defaultSkillName = skills[defaultSkill] || defaultSkill;
+
+      const content = `
+        <form>
+          <div class="form-group">
+            <p style="margin-bottom: 12px;">
+              You already have proficiency in <strong>${defaultSkillName}</strong>.
+              Choose a different skill proficiency instead:
+            </p>
+            <label>Choose an alternative skill:</label>
+            <select id="skill-select" style="width: 100%; margin-top: 8px;">
+              ${Object.entries(skills).map(([code, name]) => `
+                <option value="${code}">${name}</option>
+              `).join('')}
+            </select>
+          </div>
+        </form>
+      `;
+
+      new Dialog({
+        title: 'Choose Alternative Skill',
+        content: content,
+        buttons: {
+          confirm: {
+            icon: '<i class="fas fa-check"></i>',
+            label: 'Confirm',
+            callback: (html) => {
+              const selected = html.find('#skill-select').val();
+              resolve(selected);
+            }
+          },
+          useDefault: {
+            icon: '<i class="fas fa-star"></i>',
+            label: `Keep ${defaultSkillName}`,
+            callback: () => resolve(defaultSkill)
+          }
+        },
+        default: 'confirm'
+      }).render(true);
+    });
   }
 
   /**

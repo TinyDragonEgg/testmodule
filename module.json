@@ -2,7 +2,7 @@
   "id": "aspects-dual-backgrounds",
   "title": "Aspects of Verun: Dual Backgrounds",
   "description": "Enables dual background system for Aspects of Verun setting - choose one Profession background and one Cultural Origin background",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "compatibility": {
     "minimum": "11",
     "verified": "13"
@@ -48,7 +48,7 @@
   ],
   "url": "https://github.com/TinyDragonEgg/testmodule",
   "manifest": "https://raw.githubusercontent.com/TinyDragonEgg/testmodule/main/module.json",
-  "download": "https://github.com/TinyDragonEgg/testmodule/releases/download/1.2.2/module.zip",
+  "download": "https://github.com/TinyDragonEgg/testmodule/releases/download/1.2.3/module.zip",
   "license": "MIT",
   "readme": "https://raw.githubusercontent.com/TinyDragonEgg/testmodule/main/README.md"
 }
