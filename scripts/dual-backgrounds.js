@@ -357,7 +357,7 @@ class DualBackgroundsManager {
       // Feature 1: Main cultural heritage feature
       itemsToCreate.push({
         name: originData.mainFeature.name,
-        type: 'background',
+        type: 'feat',
         img: 'icons/environment/people/group.webp',
         system: {
           description: {
@@ -366,7 +366,11 @@ class DualBackgroundsManager {
             unidentified: ''
           },
           source: 'Aspects of Verun',
-          activation: { type: 'special', cost: null, condition: '' },
+          type: {
+            value: 'background',
+            subtype: ''
+          },
+          activation: { type: '', cost: null, condition: '' },
           duration: { value: null, units: '' },
           target: { value: null, width: null, units: '', type: '' },
           range: { value: null, long: null, units: '' },
@@ -394,7 +398,7 @@ class DualBackgroundsManager {
       // Feature 2: Special feature
       itemsToCreate.push({
         name: originData.specialFeature.name,
-        type: 'background',
+        type: 'feat',
         img: 'icons/sundries/books/book-symbol-eye.webp',
         system: {
           description: {
@@ -403,7 +407,11 @@ class DualBackgroundsManager {
             unidentified: ''
           },
           source: 'Aspects of Verun',
-          activation: { type: 'special', cost: null, condition: '' },
+          type: {
+            value: 'background',
+            subtype: ''
+          },
+          activation: { type: '', cost: null, condition: '' },
           duration: { value: null, units: '' },
           target: { value: null, width: null, units: '', type: '' },
           range: { value: null, long: null, units: '' },
@@ -431,7 +439,7 @@ class DualBackgroundsManager {
       // Feature 3: Cultural trait
       itemsToCreate.push({
         name: originData.culturalTrait.name,
-        type: 'background',
+        type: 'feat',
         img: 'icons/magic/symbols/runes-star-pentagon-blue.webp',
         system: {
           description: {
@@ -440,7 +448,11 @@ class DualBackgroundsManager {
             unidentified: ''
           },
           source: 'Aspects of Verun',
-          activation: { type: 'special', cost: null, condition: '' },
+          type: {
+            value: 'background',
+            subtype: ''
+          },
+          activation: { type: '', cost: null, condition: '' },
           duration: { value: null, units: '' },
           target: { value: null, width: null, units: '', type: '' },
           range: { value: null, long: null, units: '' },
