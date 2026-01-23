@@ -357,7 +357,7 @@ class DualBackgroundsManager {
       // Feature 1: Main cultural heritage feature
       itemsToCreate.push({
         name: originData.mainFeature.name,
-        type: 'feat',
+        type: 'background',
         img: 'icons/environment/people/group.webp',
         system: {
           description: {
@@ -394,7 +394,7 @@ class DualBackgroundsManager {
       // Feature 2: Special feature
       itemsToCreate.push({
         name: originData.specialFeature.name,
-        type: 'feat',
+        type: 'background',
         img: 'icons/sundries/books/book-symbol-eye.webp',
         system: {
           description: {
@@ -431,7 +431,7 @@ class DualBackgroundsManager {
       // Feature 3: Cultural trait
       itemsToCreate.push({
         name: originData.culturalTrait.name,
-        type: 'feat',
+        type: 'background',
         img: 'icons/magic/symbols/runes-star-pentagon-blue.webp',
         system: {
           description: {
