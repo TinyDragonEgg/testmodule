@@ -249,43 +249,55 @@ class DualBackgroundsManager {
       </div>
     `;
 
-    // Try multiple insertion points
+    // Try multiple insertion points on the Details tab
     let inserted = false;
 
     if (html instanceof jQuery) {
-      // jQuery version (V1 sheets)
+      // jQuery version (V1 sheets) - insert on Details tab
       const selectors = [
-        '.tab.biography',
-        '.tab[data-tab="biography"]',
-        '.sheet-body .tab.biography',
-        '.biography',
-        '.tab.description'
+        '.tab.details .form-group:has(input[name="system.details.background"])',
+        '.tab[data-tab="details"] .form-group:has(input[name="system.details.background"])',
+        '.tab.details',
+        '.tab[data-tab="details"]',
+        '.sheet-body .tab.details'
       ];
 
       for (const selector of selectors) {
         const target = html.find(selector).first();
         if (target.length) {
-          target.prepend(culturalOriginHTML);
+          // If we found the background field group, insert after it
+          if (selector.includes('background')) {
+            target.after(culturalOriginHTML);
+          } else {
+            // Otherwise prepend to details tab
+            target.prepend(culturalOriginHTML);
+          }
           this.log(`Inserted via jQuery selector: ${selector}`);
           inserted = true;
           break;
         }
       }
     } else {
-      // Vanilla JS version (V2 sheets)
+      // Vanilla JS version (V2 sheets) - insert on Details tab
       const selectors = [
-        '.tab.biography',
-        '.tab[data-tab="biography"]',
-        '.sheet-body .tab.biography',
-        '.biography',
-        '.tab.description',
-        '[data-tab="biography"]'
+        '.tab.details .form-group:has(input[name="system.details.background"])',
+        '.tab[data-tab="details"] .form-group:has(input[name="system.details.background"])',
+        '.tab.details',
+        '.tab[data-tab="details"]',
+        '.sheet-body .tab.details',
+        '[data-tab="details"]'
       ];
 
       for (const selector of selectors) {
         const target = html.querySelector(selector);
         if (target) {
-          target.insertAdjacentHTML('afterbegin', culturalOriginHTML);
+          // If we found the background field group, insert after it
+          if (selector.includes('background')) {
+            target.insertAdjacentHTML('afterend', culturalOriginHTML);
+          } else {
+            // Otherwise prepend to details tab
+            target.insertAdjacentHTML('afterbegin', culturalOriginHTML);
+          }
           this.log(`Inserted via selector: ${selector}`);
           inserted = true;
           break;
