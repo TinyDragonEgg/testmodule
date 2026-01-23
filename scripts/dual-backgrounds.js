@@ -561,23 +561,41 @@ class DualBackgroundsManager {
       const selectedLanguage = await this.showLanguageDialog();
       if (selectedLanguage) {
         // Add language to actor's traits
-        // D&D 5e system uses different structures depending on version
         const languageKey = selectedLanguage.toLowerCase().replace(/\s+/g, '');
 
         try {
-          // Try modern structure first (v3.0+)
-          const currentLanguages = actor.system.traits?.languages?.value || [];
+          // D&D 5e v5.2.4+ uses Set for languages
+          const currentLanguages = actor.system.traits?.languages?.value;
 
           this.log(`Current languages:`, currentLanguages);
           this.log(`Attempting to add language: ${selectedLanguage} (key: ${languageKey})`);
 
-          if (!currentLanguages.includes(languageKey) && !currentLanguages.includes(selectedLanguage.toLowerCase())) {
-            const updatedLanguages = [...currentLanguages, languageKey];
-            await actor.update({ 'system.traits.languages.value': updatedLanguages });
+          if (currentLanguages instanceof Set) {
+            // v5.2.4+ uses Set
+            if (!currentLanguages.has(languageKey) && !currentLanguages.has(selectedLanguage.toLowerCase())) {
+              const updatedLanguages = new Set(currentLanguages);
+              updatedLanguages.add(languageKey);
+              await actor.update({ 'system.traits.languages.value': Array.from(updatedLanguages) });
+              this.log(`Added language: ${selectedLanguage}`);
+              ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
+            } else {
+              ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+            }
+          } else if (Array.isArray(currentLanguages)) {
+            // Older versions use Array
+            if (!currentLanguages.includes(languageKey) && !currentLanguages.includes(selectedLanguage.toLowerCase())) {
+              const updatedLanguages = [...currentLanguages, languageKey];
+              await actor.update({ 'system.traits.languages.value': updatedLanguages });
+              this.log(`Added language: ${selectedLanguage}`);
+              ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
+            } else {
+              ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+            }
+          } else {
+            // Fallback if structure is unknown
+            await actor.update({ 'system.traits.languages.value': [languageKey] });
             this.log(`Added language: ${selectedLanguage}`);
             ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
-          } else {
-            ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
           }
         } catch (err) {
           this.log('Error adding language:', err);
