@@ -316,17 +316,37 @@ class DualBackgroundsManager {
 
     const oldCulturalOrigin = actor.getFlag(this.ID, this.FLAGS.CULTURAL_ORIGIN);
 
-    // If cultural origin is changing, update the actor
+    // If cultural origin is changing, add skill and language to this update
     if (newCulturalOrigin !== oldCulturalOrigin) {
-      await this.applyCulturalOrigin(actor, newCulturalOrigin, oldCulturalOrigin);
+      const allOrigins = this.getAllCulturalOrigins();
+
+      // Remove old skill proficiency
+      if (oldCulturalOrigin && allOrigins[oldCulturalOrigin]?.skill) {
+        const oldSkillPath = `system.skills.${allOrigins[oldCulturalOrigin].skill}.proficient`;
+        foundry.utils.setProperty(changes, oldSkillPath, 0);
+        this.log(`Removing old skill: ${allOrigins[oldCulturalOrigin].skill}`);
+      }
+
+      // Add new skill proficiency
+      if (newCulturalOrigin && allOrigins[newCulturalOrigin]?.skill) {
+        const skillPath = `system.skills.${allOrigins[newCulturalOrigin].skill}.proficient`;
+        foundry.utils.setProperty(changes, skillPath, 1);
+        this.log(`Adding skill proficiency in update: ${allOrigins[newCulturalOrigin].skill} at path ${skillPath}`);
+        this.log(`Changes object after skill set:`, changes);
+      }
+
+      // Schedule features/equipment/language to be applied after update completes
+      setTimeout(() => {
+        this.applyCulturalOriginFeatures(actor, newCulturalOrigin, oldCulturalOrigin);
+      }, 100);
     }
   }
 
   /**
-   * Apply cultural origin as 3 separate features + equipment
+   * Apply cultural origin features, equipment, and language (called after actor update completes)
    */
-  static async applyCulturalOrigin(actor, newOrigin, oldOrigin) {
-    this.log(`Applying cultural origin: ${newOrigin} (was: ${oldOrigin})`);
+  static async applyCulturalOriginFeatures(actor, newOrigin, oldOrigin) {
+    this.log(`Applying cultural origin features: ${newOrigin} (was: ${oldOrigin})`);
 
     // Remove old cultural origin features and equipment
     if (oldOrigin) {
@@ -337,14 +357,6 @@ class DualBackgroundsManager {
       if (oldItems.length > 0) {
         await actor.deleteEmbeddedDocuments('Item', oldItems.map(i => i.id));
         this.log(`Removed ${oldItems.length} old cultural origin items`);
-      }
-
-      // Remove skill proficiency from old origin
-      const allOrigins = this.getAllCulturalOrigins();
-      const oldSkill = allOrigins[oldOrigin]?.skill;
-      if (oldSkill) {
-        const skillPath = `system.skills.${oldSkill}.proficient`;
-        await actor.update({ [skillPath]: 0 });
       }
     }
 
@@ -538,25 +550,6 @@ class DualBackgroundsManager {
       await actor.createEmbeddedDocuments('Item', itemsToCreate);
       this.log(`Created ${itemsToCreate.length} items for ${newOrigin}`);
 
-      // Add skill proficiency
-      if (originData.skill) {
-        try {
-          const skillPath = `system.skills.${originData.skill}.proficient`;
-          const currentValue = foundry.utils.getProperty(actor, skillPath);
-          this.log(`Current skill value for ${originData.skill}:`, currentValue);
-
-          await actor.update({ [skillPath]: 1 });
-          this.log(`Added ${originData.skill} proficiency (set to 1)`);
-
-          // Verify it was set
-          const newValue = foundry.utils.getProperty(actor, skillPath);
-          this.log(`New skill value for ${originData.skill}:`, newValue);
-        } catch (err) {
-          this.log('Error adding skill proficiency:', err);
-          ui.notifications.warn(`Failed to add ${originData.skill} proficiency. Please add manually.`);
-        }
-      }
-
       // Show language selection dialog
       const selectedLanguage = await this.showLanguageDialog();
       if (selectedLanguage) {
@@ -564,41 +557,52 @@ class DualBackgroundsManager {
         const languageKey = selectedLanguage.toLowerCase().replace(/\s+/g, '');
 
         try {
-          // D&D 5e v5.2.4+ uses Set for languages
-          const currentLanguages = actor.system.traits?.languages?.value;
+          // Get fresh actor data
+          const currentActor = game.actors.get(actor.id);
+          const currentLanguages = currentActor.system.traits?.languages?.value;
 
           this.log(`Current languages:`, currentLanguages);
+          this.log(`Language type:`, currentLanguages?.constructor?.name);
           this.log(`Attempting to add language: ${selectedLanguage} (key: ${languageKey})`);
 
+          let alreadyKnown = false;
+          let updatedLanguages;
+
           if (currentLanguages instanceof Set) {
-            // v5.2.4+ uses Set
-            if (!currentLanguages.has(languageKey) && !currentLanguages.has(selectedLanguage.toLowerCase())) {
-              const updatedLanguages = new Set(currentLanguages);
-              updatedLanguages.add(languageKey);
-              await actor.update({ 'system.traits.languages.value': Array.from(updatedLanguages) });
-              this.log(`Added language: ${selectedLanguage}`);
-              ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
-            } else {
-              ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+            // v5.2.4+ uses Set - check if already known
+            this.log('Language storage is Set');
+            alreadyKnown = currentLanguages.has(languageKey) || currentLanguages.has(selectedLanguage.toLowerCase());
+            if (!alreadyKnown) {
+              updatedLanguages = Array.from(currentLanguages);
+              updatedLanguages.push(languageKey);
+              this.log('Updated languages array:', updatedLanguages);
             }
           } else if (Array.isArray(currentLanguages)) {
             // Older versions use Array
-            if (!currentLanguages.includes(languageKey) && !currentLanguages.includes(selectedLanguage.toLowerCase())) {
-              const updatedLanguages = [...currentLanguages, languageKey];
-              await actor.update({ 'system.traits.languages.value': updatedLanguages });
-              this.log(`Added language: ${selectedLanguage}`);
-              ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
-            } else {
-              ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+            this.log('Language storage is Array');
+            alreadyKnown = currentLanguages.includes(languageKey) || currentLanguages.includes(selectedLanguage.toLowerCase());
+            if (!alreadyKnown) {
+              updatedLanguages = [...currentLanguages, languageKey];
+              this.log('Updated languages array:', updatedLanguages);
             }
           } else {
             // Fallback if structure is unknown
-            await actor.update({ 'system.traits.languages.value': [languageKey] });
-            this.log(`Added language: ${selectedLanguage}`);
+            this.log('Language storage is unknown type, creating new array');
+            updatedLanguages = [languageKey];
+          }
+
+          if (alreadyKnown) {
+            this.log(`Language ${selectedLanguage} already known`);
+            ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+          } else {
+            this.log('Updating actor with languages:', updatedLanguages);
+            await currentActor.update({ 'system.traits.languages.value': updatedLanguages });
+            this.log(`Successfully added language: ${selectedLanguage}`);
             ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
           }
         } catch (err) {
           this.log('Error adding language:', err);
+          console.error(err);
           ui.notifications.warn(`Applied ${newOrigin}. Please add ${selectedLanguage} manually from the character sheet.`);
         }
       } else {
