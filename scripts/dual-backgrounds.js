@@ -223,22 +223,27 @@ class DualBackgroundsManager {
     // Get all cultural origins (built-in + custom)
     const allOrigins = this.getAllCulturalOrigins();
 
+    // Check if sheet is editable
+    const isEditable = data.editable !== false;
+
     // Create cultural origin pill HTML matching Foundry's native race/background style
     const culturalOriginHTML = culturalOrigin && culturalOrigin !== ''
       ? `<div class="draggable pill-lg texture cultural-origin item-tooltip"
-             data-action="editCulturalOrigin"
+             ${isEditable ? 'data-action="editCulturalOrigin"' : ''}
              data-tooltip="Cultural Origin: ${culturalOrigin}">
           <div class="name name-stacked">
             <span class="subtitle">Cultural Origin</span>
             <span class="title">${culturalOrigin}</span>
           </div>
-          <button type="button" class="config-button unbutton" data-action="deleteCulturalOrigin" data-tooltip="Remove Cultural Origin">
-            <i class="fas fa-trash"></i>
-          </button>
+          ${isEditable ? '<button type="button" class="config-button unbutton" data-action="deleteCulturalOrigin" data-tooltip="Remove Cultural Origin"><i class="fas fa-trash"></i></button>' : ''}
         </div>`
-      : `<div class="pill-lg empty roboto-upper cultural-origin" data-action="editCulturalOrigin" data-tooltip="Add Cultural Origin">
-          <span>Cultural Origin</span>
-        </div>`;
+      : isEditable
+        ? `<div class="pill-lg empty roboto-upper cultural-origin" data-action="editCulturalOrigin" data-tooltip="Add Cultural Origin">
+            <span>Cultural Origin</span>
+          </div>`
+        : `<div class="pill-lg empty roboto-upper cultural-origin" data-tooltip="Cultural Origin">
+            <span>Cultural Origin</span>
+          </div>`;
 
     // Try to find the pills-lg container and insert cultural origin pill
     let inserted = false;
@@ -291,29 +296,31 @@ class DualBackgroundsManager {
     } else {
       this.log('Cultural origin pill added successfully');
 
-      // Add click handlers for the pill
-      const pillElement = html instanceof jQuery
-        ? html.find('[data-action="editCulturalOrigin"]')[0]
-        : html.querySelector('[data-action="editCulturalOrigin"]');
+      // Add click handlers only if sheet is editable
+      if (isEditable) {
+        const pillElement = html instanceof jQuery
+          ? html.find('[data-action="editCulturalOrigin"]')[0]
+          : html.querySelector('[data-action="editCulturalOrigin"]');
 
-      const deleteButton = html instanceof jQuery
-        ? html.find('[data-action="deleteCulturalOrigin"]')[0]
-        : html.querySelector('[data-action="deleteCulturalOrigin"]');
+        const deleteButton = html instanceof jQuery
+          ? html.find('[data-action="deleteCulturalOrigin"]')[0]
+          : html.querySelector('[data-action="deleteCulturalOrigin"]');
 
-      if (pillElement) {
-        pillElement.addEventListener('click', async (event) => {
-          if (event.target.closest('[data-action="deleteCulturalOrigin"]')) {
-            return; // Let delete button handle its own event
-          }
-          await this.showCulturalOriginDialog(actor, allOrigins);
-        });
-      }
+        if (pillElement) {
+          pillElement.addEventListener('click', async (event) => {
+            if (event.target.closest('[data-action="deleteCulturalOrigin"]')) {
+              return; // Let delete button handle its own event
+            }
+            await this.showCulturalOriginDialog(actor, allOrigins);
+          });
+        }
 
-      if (deleteButton) {
-        deleteButton.addEventListener('click', async (event) => {
-          event.stopPropagation();
-          await actor.update({ [`flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}`]: '' });
-        });
+        if (deleteButton) {
+          deleteButton.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            await actor.update({ [`flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}`]: '' });
+          });
+        }
       }
     }
   }
