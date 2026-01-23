@@ -209,11 +209,11 @@ class DualBackgroundsManager {
 
     // Check if already added to prevent duplicates
     const existing = html instanceof jQuery
-      ? html.find('.cultural-origin-group').length > 0
-      : html.querySelector('.cultural-origin-group');
+      ? html.find('.cultural-origin').length > 0
+      : html.querySelector('.cultural-origin');
 
     if (existing) {
-      this.log('Cultural origin selector already present');
+      this.log('Cultural origin pill already present');
       return;
     }
 
@@ -223,78 +223,56 @@ class DualBackgroundsManager {
     // Get all cultural origins (built-in + custom)
     const allOrigins = this.getAllCulturalOrigins();
 
-    // Check if sheet is in edit mode (editable property exists in data object)
-    const isEditable = data.editable !== false;
+    // Create cultural origin pill HTML matching Foundry's native race/background style
+    const culturalOriginHTML = culturalOrigin && culturalOrigin !== ''
+      ? `<div class="draggable pill-lg texture cultural-origin item-tooltip"
+             data-action="editCulturalOrigin"
+             data-tooltip="Cultural Origin: ${culturalOrigin}">
+          <div class="name name-stacked">
+            <span class="subtitle">Cultural Origin</span>
+            <span class="title">${culturalOrigin}</span>
+          </div>
+          <button type="button" class="config-button unbutton" data-action="deleteCulturalOrigin" data-tooltip="Remove Cultural Origin">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>`
+      : `<div class="pill-lg empty roboto-upper cultural-origin" data-action="editCulturalOrigin" data-tooltip="Add Cultural Origin">
+          <span>Cultural Origin</span>
+        </div>`;
 
-    // Get the display name for the current origin
-    const displayName = culturalOrigin || 'None';
-
-    // Create cultural origin selector HTML matching Foundry's style
-    const culturalOriginHTML = `
-      <div class="form-group stacked cultural-origin-group">
-        <label>Cultural Origin</label>
-        <div class="form-fields">
-          <select name="flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}" data-dtype="String">
-            <option value="">None</option>
-            ${Object.keys(allOrigins).map(origin => `
-              <option value="${origin}" ${culturalOrigin === origin ? 'selected' : ''}>${origin}</option>
-            `).join('')}
-          </select>
-        </div>
-        <p class="hint">Choose your cultural heritage in addition to your profession background</p>
-      </div>
-    `;
-
-    // Try multiple insertion points on the Details tab
+    // Try to find the pills-lg container and insert cultural origin pill
     let inserted = false;
 
     if (html instanceof jQuery) {
-      // jQuery version (V1 sheets) - insert on Details tab
+      // jQuery version (V1 sheets) - target the pills-lg container
       const selectors = [
-        '.tab.details .form-group:has(input[name="system.details.background"])',
-        '.tab[data-tab="details"] .form-group:has(input[name="system.details.background"])',
-        '.tab.details',
-        '.tab[data-tab="details"]',
-        '.sheet-body .tab.details'
+        '.tab.details .pills-lg',
+        '.tab[data-tab="details"] .pills-lg',
+        'section.tab.details .pills-lg'
       ];
 
       for (const selector of selectors) {
         const target = html.find(selector).first();
         if (target.length) {
-          // If we found the background field group, insert after it
-          if (selector.includes('background')) {
-            target.after(culturalOriginHTML);
-          } else {
-            // Otherwise prepend to details tab
-            target.prepend(culturalOriginHTML);
-          }
-          this.log(`Inserted via jQuery selector: ${selector}`);
+          target.append(culturalOriginHTML);
+          this.log(`Inserted cultural origin pill via jQuery selector: ${selector}`);
           inserted = true;
           break;
         }
       }
     } else {
-      // Vanilla JS version (V2 sheets) - insert on Details tab
+      // Vanilla JS version (V2 sheets) - target the pills-lg container
       const selectors = [
-        '.tab.details .form-group:has(input[name="system.details.background"])',
-        '.tab[data-tab="details"] .form-group:has(input[name="system.details.background"])',
-        '.tab.details',
-        '.tab[data-tab="details"]',
-        '.sheet-body .tab.details',
-        '[data-tab="details"]'
+        '.tab.details .pills-lg',
+        '.tab[data-tab="details"] .pills-lg',
+        'section.tab.details .pills-lg'
       ];
 
       for (const selector of selectors) {
         const target = html.querySelector(selector);
         if (target) {
-          // If we found the background field group, insert after it
-          if (selector.includes('background')) {
-            target.insertAdjacentHTML('afterend', culturalOriginHTML);
-          } else {
-            // Otherwise prepend to details tab
-            target.insertAdjacentHTML('afterbegin', culturalOriginHTML);
-          }
-          this.log(`Inserted via selector: ${selector}`);
+          target.insertAdjacentHTML('beforeend', culturalOriginHTML);
+          this.log(`Inserted cultural origin pill via selector: ${selector}`);
           inserted = true;
           break;
         }
@@ -302,13 +280,41 @@ class DualBackgroundsManager {
     }
 
     if (!inserted) {
-      this.log('WARNING: Could not find suitable location to insert cultural origin selector');
-      this.log('Available selectors:', html instanceof jQuery
-        ? Array.from(html.find('*')).slice(0, 20).map(el => el.className)
-        : Array.from(html.querySelectorAll('*')).slice(0, 20).map(el => el.className)
-      );
+      this.log('WARNING: Could not find pills-lg container to insert cultural origin');
+      this.log('Looking for pills-lg in:', html instanceof jQuery ? 'jQuery' : 'HTMLElement');
+      // Debug: show what we can find
+      if (html instanceof jQuery) {
+        this.log('Pills containers found:', html.find('.pills-lg').length);
+      } else {
+        this.log('Pills containers found:', html.querySelectorAll('.pills-lg').length);
+      }
     } else {
-      this.log('Cultural origin selector added successfully');
+      this.log('Cultural origin pill added successfully');
+
+      // Add click handlers for the pill
+      const pillElement = html instanceof jQuery
+        ? html.find('[data-action="editCulturalOrigin"]')[0]
+        : html.querySelector('[data-action="editCulturalOrigin"]');
+
+      const deleteButton = html instanceof jQuery
+        ? html.find('[data-action="deleteCulturalOrigin"]')[0]
+        : html.querySelector('[data-action="deleteCulturalOrigin"]');
+
+      if (pillElement) {
+        pillElement.addEventListener('click', async (event) => {
+          if (event.target.closest('[data-action="deleteCulturalOrigin"]')) {
+            return; // Let delete button handle its own event
+          }
+          await this.showCulturalOriginDialog(actor, allOrigins);
+        });
+      }
+
+      if (deleteButton) {
+        deleteButton.addEventListener('click', async (event) => {
+          event.stopPropagation();
+          await actor.update({ [`flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}`]: '' });
+        });
+      }
     }
   }
 
@@ -669,6 +675,55 @@ class DualBackgroundsManager {
       this.log('Error removing languages:', err);
       console.error(err);
     }
+  }
+
+  /**
+   * Show cultural origin selection dialog
+   */
+  static async showCulturalOriginDialog(actor, allOrigins) {
+    return new Promise((resolve) => {
+      const origins = Object.keys(allOrigins);
+      const currentOrigin = actor.getFlag(this.ID, this.FLAGS.CULTURAL_ORIGIN) || '';
+
+      const content = `
+        <form>
+          <div class="form-group">
+            <label>Choose your Cultural Origin:</label>
+            <select id="origin-select" style="width: 100%; margin-top: 8px;">
+              <option value="">None</option>
+              ${origins.map(origin => `
+                <option value="${origin}" ${origin === currentOrigin ? 'selected' : ''}>${origin}</option>
+              `).join('')}
+            </select>
+          </div>
+          <p class="hint" style="margin-top: 8px; font-size: 0.9em; color: #666;">
+            Your cultural origin provides a skill proficiency, language, equipment, and special features.
+          </p>
+        </form>
+      `;
+
+      new Dialog({
+        title: 'Choose Cultural Origin',
+        content: content,
+        buttons: {
+          confirm: {
+            icon: '<i class="fas fa-check"></i>',
+            label: 'Confirm',
+            callback: async (html) => {
+              const selected = html.find('#origin-select').val();
+              await actor.update({ [`flags.${this.ID}.${this.FLAGS.CULTURAL_ORIGIN}`]: selected });
+              resolve(selected);
+            }
+          },
+          cancel: {
+            icon: '<i class="fas fa-times"></i>',
+            label: 'Cancel',
+            callback: () => resolve(null)
+          }
+        },
+        default: 'confirm'
+      }).render(true);
+    });
   }
 
   /**
