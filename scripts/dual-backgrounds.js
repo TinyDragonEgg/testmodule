@@ -507,24 +507,48 @@ class DualBackgroundsManager {
 
       // Add skill proficiency
       if (originData.skill) {
-        const skillPath = `system.skills.${originData.skill}.proficient`;
-        await actor.update({ [skillPath]: 1 });
-        this.log(`Added ${originData.skill} proficiency`);
+        try {
+          const skillPath = `system.skills.${originData.skill}.proficient`;
+          const currentValue = foundry.utils.getProperty(actor, skillPath);
+          this.log(`Current skill value for ${originData.skill}:`, currentValue);
+
+          await actor.update({ [skillPath]: 1 });
+          this.log(`Added ${originData.skill} proficiency (set to 1)`);
+
+          // Verify it was set
+          const newValue = foundry.utils.getProperty(actor, skillPath);
+          this.log(`New skill value for ${originData.skill}:`, newValue);
+        } catch (err) {
+          this.log('Error adding skill proficiency:', err);
+          ui.notifications.warn(`Failed to add ${originData.skill} proficiency. Please add manually.`);
+        }
       }
 
       // Show language selection dialog
       const selectedLanguage = await this.showLanguageDialog();
       if (selectedLanguage) {
         // Add language to actor's traits
-        const currentLanguages = actor.system.traits?.languages?.value || [];
-        if (!currentLanguages.includes(selectedLanguage.toLowerCase())) {
-          const languagesPath = 'system.traits.languages.value';
-          const updatedLanguages = [...currentLanguages, selectedLanguage.toLowerCase()];
-          await actor.update({ [languagesPath]: updatedLanguages });
-          this.log(`Added language: ${selectedLanguage}`);
-          ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
-        } else {
-          ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+        // D&D 5e system uses different structures depending on version
+        const languageKey = selectedLanguage.toLowerCase().replace(/\s+/g, '');
+
+        try {
+          // Try modern structure first (v3.0+)
+          const currentLanguages = actor.system.traits?.languages?.value || [];
+
+          this.log(`Current languages:`, currentLanguages);
+          this.log(`Attempting to add language: ${selectedLanguage} (key: ${languageKey})`);
+
+          if (!currentLanguages.includes(languageKey) && !currentLanguages.includes(selectedLanguage.toLowerCase())) {
+            const updatedLanguages = [...currentLanguages, languageKey];
+            await actor.update({ 'system.traits.languages.value': updatedLanguages });
+            this.log(`Added language: ${selectedLanguage}`);
+            ui.notifications.info(`Applied ${newOrigin} with ${selectedLanguage} language!`);
+          } else {
+            ui.notifications.info(`Applied ${newOrigin}. ${selectedLanguage} was already known!`);
+          }
+        } catch (err) {
+          this.log('Error adding language:', err);
+          ui.notifications.warn(`Applied ${newOrigin}. Please add ${selectedLanguage} manually from the character sheet.`);
         }
       } else {
         ui.notifications.info(`Applied ${newOrigin}. Add your language manually from the character sheet.`);
